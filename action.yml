@@ -1,5 +1,5 @@
 # action.yml
-name: 'Deploy to Aptible'
+name: 'Deploy to Aptible (patch)'
 description: 'Deploy an app from a Dockerfile to Aptible'
 inputs:
   username:
