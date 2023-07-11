@@ -35,6 +35,7 @@ if ! APTIBLE_OUTPUT_FORMAT=json aptible apps | jq -e ".[] | select(.handle == \"
   exit 1
 fi
 
+set -x
 aptible deploy --environment "$INPUT_ENVIRONMENT" \
                --app "$INPUT_APP" \
                --docker-image "$INPUT_DOCKER_IMG" \
