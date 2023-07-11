@@ -36,18 +36,21 @@ if ! APTIBLE_OUTPUT_FORMAT=json aptible apps | jq -e ".[] | select(.handle == \"
 fi
 
 set -x
-# Create an array from the JSON variable if INPUT_CONFIG_VARIABLES is not set. Use the converted array to set INPUT_CONFIG_VARIABLES
-if [[ -z "${INPUT_CONFIG_VARIABLES}" ]]; then
-    args=()
+
+ARGS_ARRAY=()
+if [ -n "${INPUT_CONFIG_VARIABLES_JSON}" ]; then
     while IFS= read -r line; do
-      args+=("$line")
+      ARGS_ARRAY+=("$line")
     done < <(echo "${INPUT_CONFIG_VARIABLES_JSON}" | jq -r '.[]' | sed 's/\\\"/\"/g')
-    INPUT_CONFIG_VARIABLES="${args[@]}"
+elif [ -n "${INPUT_CONFIG_VARIABLES}" ]; then
+    while read -r line; do
+        ARGS_ARRAY+=("$line")
+    done < <(echo "${INPUT_CONFIG_VARIABLES}")
 fi
 
-aptible deploy --environment "$INPUT_ENVIRONMENT" \
-               --app "$INPUT_APP" \
-               --docker-image "$INPUT_DOCKER_IMG" \
-               --private-registry-username "$INPUT_PRIVATE_REGISTRY_USERNAME" \
-               --private-registry-password "$INPUT_PRIVATE_REGISTRY_PASSWORD" \
-               ${INPUT_CONFIG_VARIABLES[@]}
+aptible deploy --environment "${INPUT_ENVIRONMENT}" \
+               --app "${INPUT_APP}" \
+               --docker-image "${INPUT_DOCKER_IMG}" \
+               --private-registry-username "${INPUT_PRIVATE_REGISTRY_USERNAME}" \
+               --private-registry-password "${INPUT_PRIVATE_REGISTRY_PASSWORD}" \
+               "${ARGS_ARRAY[@]}"
