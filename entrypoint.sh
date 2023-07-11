@@ -36,9 +36,13 @@ if ! APTIBLE_OUTPUT_FORMAT=json aptible apps | jq -e ".[] | select(.handle == \"
 fi
 
 set -x
+# Create an array from the JSON variable if INPUT_CONFIG_VARIABLES is not set. Use the converted array to set INPUT_CONFIG_VARIABLES
 if [[ -z "${INPUT_CONFIG_VARIABLES}" ]]; then
-    DEFAULT_VARS=$(echo "${INPUT_CONFIG_VARIABLES_JSON}" | jq -r '.[]' | while IFS= read -r line; do printf "%q " "$line"; done)
-    INPUT_CONFIG_VARIABLES="${DEFAULT_VARS}"
+    args=()
+    while IFS= read -r line; do
+      args+=("$line")
+    done < <(echo "${INPUT_CONFIG_VARIABLES_JSON}" | jq -r '.[]' | sed 's/\\\"/\"/g')
+    INPUT_CONFIG_VARIABLES="${args[@]}"
 fi
 
 aptible deploy --environment "$INPUT_ENVIRONMENT" \
@@ -46,5 +50,4 @@ aptible deploy --environment "$INPUT_ENVIRONMENT" \
                --docker-image "$INPUT_DOCKER_IMG" \
                --private-registry-username "$INPUT_PRIVATE_REGISTRY_USERNAME" \
                --private-registry-password "$INPUT_PRIVATE_REGISTRY_PASSWORD" \
-               ${INPUT_CONFIG_VARIABLES}
-
+               ${INPUT_CONFIG_VARIABLES[@]}
