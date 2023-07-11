@@ -35,12 +35,12 @@ if ! APTIBLE_OUTPUT_FORMAT=json aptible apps | jq -e ".[] | select(.handle == \"
   exit 1
 fi
 
+set -x
 if [[ -z "${INPUT_CONFIG_VARIABLES}" ]]; then
-    DEFAULT_VARS=$(echo "${INPUT_CONFIG_VARIABLES_JSON}" | jq -r '.[]' | tr '\n' ' ')
+    DEFAULT_VARS=$(echo "${INPUT_CONFIG_VARIABLES_JSON}" | jq -r '.[]' | while IFS= read -r line; do printf "%q " "$line"; done)
     INPUT_CONFIG_VARIABLES="${DEFAULT_VARS}"
 fi
 
-set -x
 aptible deploy --environment "$INPUT_ENVIRONMENT" \
                --app "$INPUT_APP" \
                --docker-image "$INPUT_DOCKER_IMG" \
